@@ -1,7 +1,7 @@
-const metadata = require("./metadata.json");
-const initialOrder = require("./order.json");
+const metadata = require("./metadata.json"); // TODO - We can replace this with koios calls.
+const initialOrder = require("./order.json"); // 
 
-const getSpacebudz = () => {
+const getSpacebudz = () => { // TODO we actually don't want to use koios, it's too much let's try and keep things as similar as we can to as they are.
   return Object.keys(metadata).map((id) => {
     const type = metadata[id].type;
     const gadgets = metadata[id].traits;

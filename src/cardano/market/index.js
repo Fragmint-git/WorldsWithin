@@ -30,7 +30,7 @@ const CONTRACT = () => {
 
 const CONTRACT_ADDRESS = () =>
   Loader.Cardano.Address.from_bech32(
-    "addr1wyzynye0nksztrfzpsulsq7whr3vgh7uvp0gm4p0x42ckkqqq6kxq"
+    "addr1wyvvtqlx34nu8xkpe86dcznlj9kwgpy97x0zpgqnr782hvcyjjcdh"
   );
 
 // Datums
@@ -218,9 +218,10 @@ class SpaceBudzMarket {
   async getUtxo(policy, prefix, budId) {
     const asset = policy + fromAscii(prefix + budId);
 
-    const utxos = await this.blockfrostRequest(
+    const utxos = await this.blockfrostRequest( // TODO - We need to make sure that this is going to work for us. Do we just want to use blockfrost? No.
       `/addresses/${CONTRACT_ADDRESS().to_bech32()}/utxos/${asset}`
     );
+    console.log(JSON.stringify(utxos));
 
     return await Promise.all(
       utxos.map(async (utxo) => {
@@ -230,6 +231,7 @@ class SpaceBudzMarket {
         let datum;
         let tradeOwnerAddress;
         try {
+          console.log(`Expect: ${toHex(START_BID().to_bytes())}`)
           datum = metadata
             .find((m) => m.label == DATUM_LABEL)
             .json_metadata[utxo.output_index].slice(2);
@@ -239,9 +241,13 @@ class SpaceBudzMarket {
               .find((m) => m.label == ADDRESS_LABEL)
               .json_metadata.address.slice(2);
         } catch (e) {
-          throw new Error("Some required metadata entries were not found");
+          // throw new Error("Some required metadata entries were not found");
+          console.log("Some required metadata entries were not found.")
+          datum = toHex(START_BID().to_bytes());
         }
         datum = Loader.Cardano.PlutusData.from_bytes(fromHex(datum));
+        console.log(utxo.data_hash);
+        console.log(toHex(Loader.Cardano.hash_plutus_data(datum).to_bytes()));
         if (
           toHex(Loader.Cardano.hash_plutus_data(datum).to_bytes()) !==
           utxo.data_hash
@@ -611,7 +617,8 @@ class SpaceBudzMarket {
 
   async load() {
     await Loader.load();
-    const p = await this.blockfrostRequest(`/epochs/latest/parameters`);
+    const p = await this.blockfrostRequest(`/epochs/latest/parameters`); // TODO - We have this on the other one.
+    console.log(JSON.stringify(p));
     this.protocolParameters = {
       linearFee: {
         minFeeA: p.min_fee_a.toString(),
@@ -641,30 +648,30 @@ class SpaceBudzMarket {
     // };
 
     this.contractInfo = {
-      policySpaceBudz:
-        "d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc",
-      policyBid: "800df05a0cc6b6f0d28aaa1812135bd9eebfbf5e8e80fd47da9989eb",
-      prefixSpaceBud: "SpaceBud",
-      prefixSpaceBudBid: "SpaceBudBid",
+      policySpaceBudz: // TODO - Replace the policy ids below.
+        "3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0",
+      policyBid: "314f6e0535275e1ba9335c722364865fe5503a8aa6a0f9ad640c6c94",
+      prefixSpaceBud: "WorldsWithin",
+      prefixSpaceBudBid: "WorldsWithinBid",
       owner1: {
         address: Loader.Cardano.Address.from_bech32(
-          "addr1qxpxm8a0uxe6eu2m6fgdu6wqfclujtzyjdu9jw0qdxfjaz02h5ngjz7fftac5twlxj6jha4meenh6476m5xdwmeyh4hq0zeknx"
+          "addr1q9pgdsg5ds5r7dldfny020wu5ck2e9xch7z97ufcakayfmctzv5tnwx36p2kl0dlkk5kft9z55e9k5dmpqvk9xluupdsz3s9xl"
         ),
         fee1: Loader.Cardano.BigNum.from_str("416"), // 2.4%
         fee2: Loader.Cardano.BigNum.from_str("625"), // 1.6%
       },
       owner2: {
         address: Loader.Cardano.Address.from_bech32(
-          "addr1qxyzd8utq5d88ycqle6r57e32qn0gc2vuysk5ja5t4lapavecd72l0wcsvv6t3vgj097k6a5jr4lz5pppkkf6tp83s2q9sv7dv"
+          "addr1q9pgdsg5ds5r7dldfny020wu5ck2e9xch7z97ufcakayfmctzv5tnwx36p2kl0dlkk5kft9z55e9k5dmpqvk9xluupdsz3s9xl"
         ),
         fee: Loader.Cardano.BigNum.from_str("2500"), // 0.4%
       },
       extraFee: Loader.Cardano.BigNum.from_str("2500"), // 0.4%
-      minPrice: Loader.Cardano.BigNum.from_str("70000000"),
+      minPrice: Loader.Cardano.BigNum.from_str("20000000"),
       bidStep: Loader.Cardano.BigNum.from_str("10000"),
     };
     this.extraFeeRecipient = Loader.Cardano.Address.from_bech32(
-      this.extraFeeRecipient
+      "addr1q9pgdsg5ds5r7dldfny020wu5ck2e9xch7z97ufcakayfmctzv5tnwx36p2kl0dlkk5kft9z55e9k5dmpqvk9xluupdsz3s9xl"
     );
 
     CoinSelection.setProtocolParameters(
@@ -684,7 +691,7 @@ class SpaceBudzMarket {
     const offerUtxo = await this.getUtxo(
       this.contractInfo.policySpaceBudz,
       this.contractInfo.prefixSpaceBud,
-      budId.toString()
+      budId.toString().padStart(5, "0")
     );
     if (offerUtxo.length === 1) {
       const lovelace = getTradeDetails(offerUtxo[0].datum).requestedAmount;
@@ -740,10 +747,14 @@ class SpaceBudzMarket {
    * @returns {TradeUtxo}
    */
   async getBid(budId) {
+    console.log(`getUtxo w policy: ${this.contractInfo.policyBid} , prefix: ${this.contractInfo.prefixSpaceBudBid}, id: ${budId.toString()}`)
+    let budString = budId.toString().padStart(5, "0")
+    console.log(budString)
+    // let numZeros = 5 - budString.length
     const bidUtxo = await this.getUtxo(
       this.contractInfo.policyBid,
       this.contractInfo.prefixSpaceBudBid,
-      budId.toString()
+      budString
     );
     if (bidUtxo.length !== 1) return null;
     const lovelace = bidUtxo[0].utxo.output().amount().coin().to_str();
@@ -974,7 +985,7 @@ class SpaceBudzMarket {
    */
   async offer(budId, requestedAmount) {
     const { txBuilder, datums, metadata, outputs } = await this.initTx();
-    budId = budId.toString();
+    budId = budId.toString().padStart(5, "0");
     if (
       Loader.Cardano.BigNum.from_str(requestedAmount).compare(
         this.contractInfo.minPrice

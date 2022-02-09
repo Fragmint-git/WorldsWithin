@@ -11,7 +11,7 @@ import secrets from "../../secrets";
 import { Spinner } from "@chakra-ui/spinner";
 import Loader from "../cardano/loader";
 
-const POLICY = "d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc";
+const POLICY = "3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0"; // TODO
 
 function fromHex(hex) {
   var str = "";
@@ -84,14 +84,14 @@ const Profile = ({ pageContext: { spacebudz } }) => {
       amount = valueToAssets(value);
     } else {
       amount = await fetch(
-        `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${address}`,
+        `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${address}`, // TODO
         { headers: { project_id: secrets.PROJECT_ID } }
       )
         .then((res) => res.json())
         .then((res) => res.amount);
     }
 
-    const offers = await fetch(`https://spacebudz.io/api/offers/`, {
+    const offers = await fetch(`https://spacebudz.io/api/offers/`, { // TODO - either remove these, or replace the logic.
       headers: { project_id: secrets.PROJECT_ID },
     }).then((res) => res.json());
 

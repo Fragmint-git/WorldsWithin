@@ -88,7 +88,7 @@ const TradeModal = React.forwardRef(
             {type == "BID" ? "Bid" : "Listing"}
           </ModalHeader>
           <Box textAlign="center" mt="-2" color="GrayText">
-            SPACEBUD #{budId}
+            WorldsWithin #{budId}
           </Box>
           <Box h={6} />
           <ModalBody
@@ -154,6 +154,7 @@ const TradeModal = React.forwardRef(
                     .bid(details.bid.bidUtxo, toUnit(ada))
                     .catch((e) => tradeErrorHandler(e, toast));
                 } else {
+                  // console.log(budId)
                   txHash = await market
                     .offer(budId, toUnit(ada))
                     .catch((e) => tradeErrorHandler(e, toast));

@@ -67,8 +67,8 @@ toFraction p = toInteger $ floor (1 / (p / 1000))
 
 
 contractInfo = ContractInfo 
-    { policySpaceBudz = "d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc"
-    , policyBid = "800df05a0cc6b6f0d28aaa1812135bd9eebfbf5e8e80fd47da9989eb"
+    { policySpaceBudz = "3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0"
+    , policyBid = "314f6e0535275e1ba9335c722364865fe5503a8aa6a0f9ad640c6c94"
     , prefixSpaceBud = "SpaceBud"
     , prefixSpaceBudBid = "SpaceBudBid"
     , owner1 = ("826d9fafe1b3acf15bd250de69c04e3fc92c4493785939e069932e89", 416, 625) -- 2.4% 1.6%

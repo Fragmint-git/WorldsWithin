@@ -132,10 +132,10 @@ const FAQ = () => {
                   Hash it and you get the following Policy ID:
                   <br />
                   <Link
-                    href="https://cardanoscan.io/tokenPolicy/d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc"
+                    href="https://cardanoscan.io/tokenPolicy/3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0"
                     target="_blank"
                   >
-                    d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc
+                    3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0
                   </Link>
                 </Text>
               </AccordionPanel>

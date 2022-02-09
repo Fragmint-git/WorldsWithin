@@ -110,12 +110,12 @@ const Explore = ({ pageContext: { spacebudz, initialOrder }, location }) => {
 
   const fetchData = async () => {
     setLoading(true);
-    const offers = await fetch(`https://spacebudz.io/api/offers`)
+    /*const offers = await fetch(`https://spacebudz.io/api/offers`)
       .then((res) => res.json())
       .then((res) => res.offers);
     offers.forEach(({ budId, offer }) => {
       spacebudz[budId] = { ...spacebudz[budId], price: offer.amount };
-    });
+    });*/
     fullList.current = initialOrder.map((id) => spacebudz[id]);
 
     filterInterval.current = setInterval(() => {

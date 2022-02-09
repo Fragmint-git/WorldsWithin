@@ -61,9 +61,9 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
 
   const market = React.useRef();
 
-  const POLICY = "d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc"; // mainnet
+  const POLICY = "3c2cfd4f1ad33678039cfd0347cca8df363c710067d739624218abc0"; // mainnet
   const CONTRACT_ADDRESS =
-    "addr1wyzynye0nksztrfzpsulsq7whr3vgh7uvp0gm4p0x42ckkqqq6kxq";
+    "addr1wyvvtqlx34nu8xkpe86dcznlj9kwgpy97x0zpgqnr782hvcyjjcdh";
 
   const connectedAddresses = React.useRef([]);
 
@@ -94,7 +94,7 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
     init();
   }, [connected]);
 
-  const checkTransaction = async (txHash, { type, lovelace } = {}) => {
+  const checkTransaction = async (txHash, { type, lovelace } = {}) => { // TODO - Where is this used, can we remove it?
     if (!txHash) return;
     PendingTransactionToast(toast);
     if (type) {
@@ -122,16 +122,20 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
         base: "https://cardano-mainnet.blockfrost.io/api/v0",
         projectId: secrets.PROJECT_ID,
       },
-      "addr1qxpxm8a0uxe6eu2m6fgdu6wqfclujtzyjdu9jw0qdxfjaz02h5ngjz7fftac5twlxj6jha4meenh6476m5xdwmeyh4hq0zeknx"
+      ""
     );
-    await market.current.load();
+    await market.current.load(); // TODO - Do we need to fix load at all?
   };
 
-  const loadSpaceBudData = async () => {
+  const loadSpaceBudData = async () => { // TODO - We can load the worlds within here based purely on ID I think.
     await Loader.load();
     setIsLoadingMarket(true);
     setOwner([]);
-    const token = POLICY + toHex(`SpaceBud${spacebud.id}`);
+    const sid = (spacebud.id).padStart(5, "0")
+    console.log(sid)
+    const token = POLICY + toHex(`WorldsWithin${sid}`);
+    console.log("between sid and token")
+    console.log(token)
     let addresses = await fetch(
       `https://cardano-mainnet.blockfrost.io/api/v0/assets/${token}/addresses`,
       { headers: { project_id: secrets.PROJECT_ID } }
@@ -141,17 +145,18 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
     )
       .then((res) => res.json())
       .then((res) => res.cardano["usd"]);
-    const lastSale = await fetch(
+    const lastSale = null // {"budId":spacebud.id,"offer":null,"bid":null,"lastSale":null}
+    /*await fetch( // TODO - Remove or replace. - Where are these being published from?
       `https://spacebudz.io/api/specificSpaceBud/${spacebud.id}`
     )
       .then((res) => res.json())
-      .then((res) => res.lastSale);
+      .then((res) => res.lastSale);*/
 
     const bidUtxo = await market.current.getBid(spacebud.id);
     let offerUtxo = await market.current.getOffer(spacebud.id);
 
     // check if twin
-    if (Array.isArray(offerUtxo)) {
+    /*if (Array.isArray(offerUtxo)) {
       if (
         offerUtxo.length === 2 &&
         (spacebud.id === 1903 || spacebud.id === 6413)
@@ -181,7 +186,7 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
           }
         }
       } else throw new Error("Something went wrong");
-    }
+    }*/
     const details = {
       bid: { bidUtxo: null, lovelace: null, usd: null, owner: false },
       offer: { offerUtxo: null, lovelace: null, usd: null, owner: false },
@@ -199,6 +204,8 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
       details.bid.lovelace = bidUtxo.lovelace;
       details.bid.usd = (bidUtxo.lovelace / 10 ** 6) * fiatPrice * 10 ** 2;
     }
+    console.log(addresses)
+    // console.log(address)
     if (addresses.find((address) => isOwner(address.address)))
       details.offer.owner = true;
     if (offerUtxo) {
@@ -310,24 +317,21 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
                     top: -12,
                     filter: "brightness(0.7)",
                   }}
-                  width="100%"
+                  width="70%"
                 />
               )}
               <img
                 src={spacebud.image}
                 style={{ position: "absolute" }}
-                width="100%"
+                width="70%"
               />
             </div>
           </div>
           <Box h={5} />
           <div style={{ fontWeight: 600, fontSize: 30 }}>
-            SpaceBud #{spacebud.id}
+            WorldsWithin #{spacebud.id}
           </div>
 
-          <LinkName onClick={() => navigate(`/explore/?type=${spacebud.type}`)}>
-            {spacebud.type} Astronaut
-          </LinkName>
         </div>
         <Box h={6} />
         {(spacebud.id === 1903 || spacebud.id === 6413) && (
@@ -803,7 +807,7 @@ const SpaceBud = ({ pageContext: { spacebud } }) => {
         )}
         <Box h={8} />
         <div style={{ fontSize: 26, color: "#777777", fontWeight: 600 }}>
-          Gadgets
+          Traits
         </div>
         <Box h={3} />
         <div
